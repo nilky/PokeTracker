@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PokeTracker</string>
+    <string name="pokemon_name_hint">Enter a name for the Pokemon.</string>
+    <string name="pokemon_name_label">Name</string>
+    <string name="pokemon_details_label">Details</string>
+    <string name="pokemon_shiny_label">Shiny</string>
+    <string name="pokemon_regional_label">Regional</string>
+    <string name="pokemon_IV_label">Perfect IVs</string>
+    <string name="pokemon_lucky_label">Lucky</string>
+</resources>
