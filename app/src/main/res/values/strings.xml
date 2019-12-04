@@ -7,4 +7,10 @@
     <string name="pokemon_regional_label">Regional</string>
     <string name="pokemon_IV_label">Perfect IVs</string>
     <string name="pokemon_lucky_label">Lucky</string>
+    <string name="date_picker_title">Date of pokemon:</string>
+    <string name="new_pokemon">New Pokemon</string>
+    <string name="show_subtitle">Show Subtitle</string>
+    <string name="hide_subtitle">Hide Subtitle</string>
+    <string name="subtitle_format">%1$d pokemon</string>
+    <string name="delete_pokemon">Delete Pokemon</string>
 </resources>

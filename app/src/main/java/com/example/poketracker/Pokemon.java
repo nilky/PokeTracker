@@ -14,7 +14,11 @@ public class Pokemon {
     private boolean mLucky;
 
     public Pokemon() {
-        mId = UUID.randomUUID();
+        this(UUID.randomUUID());
+    }
+
+    public Pokemon(UUID id) {
+        mId = id;
         mDate = new Date();
     }
 

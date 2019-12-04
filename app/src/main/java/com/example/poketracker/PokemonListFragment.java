@@ -1,14 +1,19 @@
 package com.example.poketracker;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,8 +22,16 @@ import java.util.List;
 
 public class PokemonListFragment extends Fragment {
 
+    private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
     private RecyclerView mPokemonRecyclerView;
     private PokemonAdapter mAdapter;
+    private boolean mSubtitleVisible;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,18 +40,89 @@ public class PokemonListFragment extends Fragment {
         mPokemonRecyclerView = (RecyclerView) view.findViewById(R.id.pokemon_recycler_view);
         mPokemonRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        if (savedInstanceState != null) {
+            mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
+        }
+
         updateUI();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_pokemon_list, menu);
+
+        MenuItem subtitleItem = menu.findItem(R.id.show_subtitle);
+        if (mSubtitleVisible) {
+            subtitleItem.setTitle(R.string.hide_subtitle);
+        } else {
+            subtitleItem.setTitle(R.string.show_subtitle);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.new_pokemon:
+                Pokemon pokemon = new Pokemon();
+
+                PokemonLab.get(getActivity()).addPokemon(pokemon);
+                Intent intent = PokeActivity.newIntent(getActivity(),pokemon.getmId());
+                startActivity(intent);
+                return true;
+            case R.id.show_subtitle:
+                mSubtitleVisible = !mSubtitleVisible;
+                getActivity().invalidateOptionsMenu();
+                updateSubtitle();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void updateSubtitle() {
+        PokemonLab pokemonLab = PokemonLab.get(getActivity());
+        int pokemonCount = pokemonLab.getmPokemons().size();
+        String subtitle =
+                getString(R.string.subtitle_format, pokemonCount);
+
+        if (!mSubtitleVisible) {
+            subtitle = null;
+        }
+
+        AppCompatActivity activity = (AppCompatActivity)
+                getActivity();
+
+        activity.getSupportActionBar().setSubtitle(subtitle);
     }
 
     private void updateUI() {
         PokemonLab pokemonLab = PokemonLab.get(getActivity());
         List<Pokemon> pokemons = pokemonLab.getmPokemons();
 
+        if (mAdapter == null) {
+            mAdapter = new PokemonAdapter(pokemons);
+            mPokemonRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.setPokemons(pokemons);
+            mAdapter.notifyDataSetChanged();
+        }
 
-        mAdapter = new PokemonAdapter(pokemons);
-        mPokemonRecyclerView.setAdapter(mAdapter);
+        updateSubtitle();
     }
 
     private class PokemonHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -66,7 +150,8 @@ public class PokemonListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(getActivity(), mPokemon.getmName() + " clicked!", Toast.LENGTH_SHORT).show();
+            Intent intent = PokeActivity.newIntent(getActivity(),mPokemon.getmId());
+            startActivity(intent);
         }
     }
 
@@ -93,6 +178,10 @@ public class PokemonListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mPokemons.size();
+        }
+
+        public void setPokemons(List<Pokemon> pokemons) {
+            mPokemons = pokemons;
         }
     }
 }
